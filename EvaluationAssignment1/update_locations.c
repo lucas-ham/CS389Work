@@ -1,5 +1,5 @@
 
-#include <main.h>
+#include "main.h"
 
 void generate_random_list(vec_t array[], double bound, int_t size){
   double range = 2*bound;
@@ -18,7 +18,7 @@ void update_coords(vec_t xs[], vec_t ys[], vec_t zs[], vec_t vx[], vec_t vy[], v
   }
 }
 
-double sum_array(vec_t array[], int_t size){
+vec_t sum_array(vec_t array[], int_t size){
   double sum = 0;
   for (int_t i = 0; i < size; i ++){
     sum += array[i];
@@ -30,9 +30,11 @@ double sum_array(vec_t array[], int_t size){
 int main(int argc, char *argv[]){
   int_t size;
   int_t iters;
-  double position_bound = 1000;
-  double velocity_bound = 1;
-  double checksum;
+  bound_t position_bound = 1000;
+  bound_t velocity_bound = 1;
+  vec_t checksum;
+  timed_t total_time;
+  timed_t per_move_time;
 
   if (argc != 3){
     printf("Required arguements: vector_length(N) and iterations_num(M) \n");
@@ -62,16 +64,24 @@ int main(int argc, char *argv[]){
   vec_t vz[size];
   generate_random_list(vz,velocity_bound, size);
 
-  struct timespec start, finish;
+  struct timespec start, finish, delta;
 
   clock_gettime(CLOCK_REALTIME, &start);
-  update_coords(&xs,&ys,&zs,&vx,&vy,&vz, size);
+  update_coords(xs,ys,zs,vx,vy,vz, size);
   clock_gettime(CLOCK_REALTIME, &finish);
+
+  delta.tv_sec = finish.tv_sec - start.tv_sec;
+  delta.tv_nsec = labs(finish.tv_nsec - start.tv_nsec);
+
+  total_time = (delta.tv_sec) + (delta.tv_nsec)/(double)BILLION;
+  per_move_time = (total_time) / size;
+  per_move_time = per_move_time/iters;      //splitting division into two steps means we won't have overflow errors
+
 
   checksum = sum_array(xs, size) + sum_array(ys, size) + sum_array(zs, size);
 
-  printf("Here are the sums! %f", checksum);
+  printf("Time per coordinate: %.17g\n", per_move_time);
+  //printf("Here are the sums! %hhd", checksum);
 
-
-
-};
+  return 0;
+}
