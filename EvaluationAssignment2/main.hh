@@ -9,3 +9,5 @@
 #include <time.h>
 
 typedef int64_t int_t;
+
+#define NANOS 1000000000
