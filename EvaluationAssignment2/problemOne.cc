@@ -117,6 +117,11 @@ int main(int argc, char *argv[]){
   conv = conv*(double)NANOS;
   printf("%f\n", conv);
   */
+  }
+  total_time = total_time/(double)searches;
+  total_time = total_time*(double)NANOS;
+  //total_time -= 31.02;
+  printf("%f",total_time);
 
   return 0;
 }
