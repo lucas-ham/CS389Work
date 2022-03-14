@@ -1,5 +1,6 @@
 CXX=g++
-CXXFLAGS=-Wall -Wextra -Werror -pedantic -o0 -g -o3 -std=c++20
+#CXXFLAGS=-Wall -Wextra -Werror -pedantic -o0 -g -o3 -std=c++20
+CXXFLAGS=-Wall -Wextra -pedantic -o0 -g -O3 -std=c++20
 
 all: make_main
 
