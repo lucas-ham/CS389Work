@@ -63,23 +63,10 @@ int main(int argc, char *argv[]){
     //so roughly each clock cycle should take 0.32 nanoseconds on my computer
 
   int_t length;
-  int_t* array;
-  int_t* array1;
-  double searches;
   int_t array2Length;
   int_t prefetch;
-  bool useArray2;
-
-  int i;
-  int j;
-
-  struct timespec strt, finish, delta;
-  double total_time = 0.0;
-
-  int_t tmp;
-  int_t srt;
-  int_t index;
-  int_t oppIndex;
+  double total_time;
+  double searches;
 
 
   if (argc != 5){
