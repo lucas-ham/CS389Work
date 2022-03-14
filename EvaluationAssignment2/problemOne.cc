@@ -83,40 +83,11 @@ int main(int argc, char *argv[]){
     tmp = array[index];
     clock_gettime(CLOCK_REALTIME, &finish);
 
-
-  //per 1000 iterations, single iterations don't show up
-
-  //CLOCKS_PER_SEC DOES NOT ACTUALLY MEAN THAT FOR A COMPUTER, JUST A GENERIC VALUE
-      //
-  indvTime = totTime/(searches/1);
-  timeTmp = indvTime/(double)CLOCKS_PER_SEC;
-  timeTmp = timeTmp*NANOS;
-
-  printf("Number of clock ticks per thousand reads:  %f\n", indvTime);
-  printf("Time (ns) per thousand reads:  %f\n", timeTmp);
     delta.tv_sec = finish.tv_sec - strt.tv_sec;
     delta.tv_nsec = labs(finish.tv_nsec - strt.tv_nsec);
 
-  auto t = NANOS/(double)CLOCKS_PER_SEC;
-  printf("%f\n",t);
     total_time += (delta.tv_sec) + (delta.tv_nsec)/(double)NANOS;
 
-  /*
-  messing around tring to find a better way to clock_t
-    doesn't really seem like clock() is the right thing, but std::chrono::high_resolution_clock also isn'typedef isnt
-    high_resolution_clock is better though, only has a few (order 100) nanoseconds of overhead, clock() isn't even really that precise to know
-  auto s = std::chrono::high_resolution_clock::now();
-  auto st = clock();
-  for (i = 0; i<100;i++){;}
-  auto en = clock();
-  auto e = std::chrono::high_resolution_clock::now();
-
-  std::cout << "It took me " << std::chrono::duration_cast<std::chrono::nanoseconds>(e - s).count() << " nanoseconds.\n";
-
-  auto conv = (en-st)/(double)CLOCKS_PER_SEC;
-  conv = conv*(double)NANOS;
-  printf("%f\n", conv);
-  */
   }
   total_time = total_time/(double)searches;
   total_time = total_time*(double)NANOS;
