@@ -82,53 +82,7 @@ int main(int argc, char *argv[]){
       return 0;
     }
   }
-
-  array = (int_t*)malloc(length*sizeof(int_t));
-  if (array2Length > 0){
-    array1 = (int_t*)malloc(array2Length*sizeof(int_t));
-    useArray2 = true;
-  } else{
-    useArray2 = false;
-  }
-  srand(clock());
-
-  for (i = 0; i<length;i++){
-    array[i] = rand();
-  }
-  if (useArray2){
-    for (i = 0; i < array2Length;i++){
-      array1[i] = rand();
-    }
-  }
-
-
-  for(i = 0; i < searches; i++){
-    index = rand()%length;
-    //in an attempt to make sure there's no useful prefetching going on we have a second array that we read from first to discourage prefetching
-      //bunch of random calls to the array before hand to try and evict any elements from array
-    if (useArray2){
-      for (j = 0; j < 50; j++){
-        oppIndex = rand()%array2Length;
-        srt = array1[oppIndex];
-      }
-    }
-
-    if (prefetch){
-      srt = array[index];
-    }
-    clock_gettime(CLOCK_REALTIME, &strt);
-    tmp = array[index];
-    clock_gettime(CLOCK_REALTIME, &finish);
-
-    delta.tv_sec = finish.tv_sec - strt.tv_sec;
-    delta.tv_nsec = labs(finish.tv_nsec - strt.tv_nsec);
-
-    total_time += (delta.tv_sec) + (delta.tv_nsec)/(double)NANOS;
-
-  }
-  total_time = total_time/(double)searches;
-  total_time = total_time*(double)NANOS;
-  //total_time -= 31.02;
+  total_time = timer(length, searches, array2Length, prefetch);
   printf("%f",total_time);
 
   return 0;
