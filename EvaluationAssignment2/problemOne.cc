@@ -83,7 +83,6 @@ int main(int argc, char *argv[]){
     tmp = array[index];
     clock_gettime(CLOCK_REALTIME, &finish);
 
-  }
 
   //per 1000 iterations, single iterations don't show up
 
@@ -95,9 +94,12 @@ int main(int argc, char *argv[]){
 
   printf("Number of clock ticks per thousand reads:  %f\n", indvTime);
   printf("Time (ns) per thousand reads:  %f\n", timeTmp);
+    delta.tv_sec = finish.tv_sec - strt.tv_sec;
+    delta.tv_nsec = labs(finish.tv_nsec - strt.tv_nsec);
 
   auto t = NANOS/(double)CLOCKS_PER_SEC;
   printf("%f\n",t);
+    total_time += (delta.tv_sec) + (delta.tv_nsec)/(double)NANOS;
 
   /*
   messing around tring to find a better way to clock_t
