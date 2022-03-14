@@ -23,13 +23,12 @@ int main(int argc, char *argv[]){
   int i;
   int j;
 
-  clock_t start, end;
+  struct timespec strt, finish, delta;
+  double total_time = 0.0;
+
   int_t tmp;
   int_t srt;
   int_t index;
-  double totTime = 0;
-  double indvTime;
-  double timeTmp;
   int_t oppIndex;
 
 
