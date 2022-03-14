@@ -79,10 +79,9 @@ int main(int argc, char *argv[]){
     if (prefetch){
       srt = array[index];
     }
-    start = clock();
+    clock_gettime(CLOCK_REALTIME, &strt);
     tmp = array[index];
-    end = clock();
-    totTime += end-start;
+    clock_gettime(CLOCK_REALTIME, &finish);
 
   }
 
