@@ -72,15 +72,15 @@ int main(int argc, char *argv[]){
   int i;
   int_t numThreads = 0;
 
-
-  if (argc != 5){
-    printf("Required arguements: vector_length(N), number of searches (S), second array size (S2), prefetch? (B)");
+  if (argc != 6){
+    printf("Required arguements: vector_length(N), number of searches (S), number of threads (T), second array size (S2), prefetch? (B)");
     return 0;
   }else {
     length = atoi(argv[1]);
     searches = atoi(argv[2]);
-    array2Length = atoi(argv[3]);
-    prefetch = atoi(argv[4]);
+    numThreads = atoi(argv[3]);
+    array2Length = atoi(argv[4]);
+    prefetch = atoi(argv[5]);
     if ((length <= 0) || (searches <= 0) || (array2Length < 0) || !((prefetch == 0) || (prefetch == 1))){
       printf("Please make sure you used valid command line inputs, prefetch should only be 0 or 1 all other values positive");
       return 0;
