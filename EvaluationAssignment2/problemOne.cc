@@ -107,9 +107,7 @@ int main(int argc, char *argv[]){
     total_time += answerVect[i];
     printf("Data from thread %d:  %f\n",i,answerVect[i]);
   }
-
-  total_time = total_time/numThreads;
-  printf("here it is %f\n",total_time);
+  printf("The total Completion time was:  %f\n",time);
   return 0;
 
 }
