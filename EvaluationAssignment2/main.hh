@@ -5,6 +5,10 @@
 #include <cstdlib>
 #include <ctime>
 #include <chrono>
+#include <thread>
+#include <vector>
+#include <functional>
+#include <random>
 
 #include <time.h>
 
