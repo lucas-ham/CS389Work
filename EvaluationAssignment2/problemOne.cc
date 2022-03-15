@@ -67,8 +67,10 @@ int main(int argc, char *argv[]){
   int_t length;
   int_t array2Length;
   int_t prefetch;
-  double total_time;
+  double total_time = 0.0;
   double searches;
+  int i;
+  int_t numThreads = 0;
 
 
   if (argc != 5){
