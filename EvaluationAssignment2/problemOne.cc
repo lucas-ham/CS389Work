@@ -84,7 +84,7 @@ int main(int argc, char *argv[]){
     }
   }
   //declare these vectors after so they can be initialized too
-  auto temp = numThreads - 280;
+  auto temp = numThreads - 250;
   if (temp >0){
     numThreads = numThreads - temp;
   }
