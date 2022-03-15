@@ -110,6 +110,8 @@ int main(int argc, char *argv[]){
   }
 
   auto flag = temp;
+  auto threadCount = 250;
+  numThreads += temp;
   while (flag > 0){
     if (flag > 250){
       flag -= 250;
@@ -136,11 +138,12 @@ int main(int argc, char *argv[]){
 
     for (i = 0; i < temp; i ++){
       total_time += answerVect[i];
-      printf("Data from thread %d:  %f\n",i+int(numThreads),answerVect[i]);
+      printf("Data from thread %d:  %f\n",i+int(threadCount),answerVect[i]);
       }
+    threadCount +=250;
     }
 
-  printf("The average thread completion time was:  %f\n",total_time/(numThreads+temp));
+  printf("The average thread completion time was:  %f\n",total_time/(numThreads));
   printf("The total Completion time was:  %f\n",time);
   return 0;
 
