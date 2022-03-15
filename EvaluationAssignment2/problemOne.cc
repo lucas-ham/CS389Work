@@ -87,6 +87,7 @@ int main(int argc, char *argv[]){
       return 0;
     }
   }
+  //declare these vectors after so they can be initialized too
   vector<thread> threadVector;
   vector<double> answerVect(numThreads, 0);
   vector<Timer> times(numThreads, Timer(length,searches,array2Length,prefetch));
