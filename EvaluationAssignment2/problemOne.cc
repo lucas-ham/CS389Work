@@ -71,6 +71,7 @@ int main(int argc, char *argv[]){
   double searches;
   int i;
   int_t numThreads = 0;
+  struct timespec start, end, delta;
 
   if (argc != 6){
     printf("Required arguements: vector_length(N), number of searches (S), number of threads (T), second array size (S2), prefetch? (B)");
@@ -89,18 +90,23 @@ int main(int argc, char *argv[]){
   vector<thread> threadVector;
   vector<double> answerVect(numThreads, 0);
   vector<Timer> times(numThreads, Timer(length,searches,array2Length,prefetch));
-  
+
+  clock_gettime(CLOCK_REALTIME, &start);
   for (i = 0; i < numThreads;i++){
     threadVector.emplace_back(times[i], &answerVect[i]);
   }
   for (i = 0; i < numThreads;i++){
     threadVector[i].join();
   }
+  clock_gettime(CLOCK_REALTIME, &end);
+  delta.tv_sec = end.tv_sec - start.tv_sec;
+  delta.tv_nsec = labs(end.tv_nsec - start.tv_nsec);
+  double time = (delta.tv_sec) + (delta.tv_nsec)/NANOS;
+
   for (i = 0; i < numThreads; i ++){
     total_time += answerVect[i];
     printf("Data from thread %d:  %f\n",i,answerVect[i]);
   }
-
 
   total_time = total_time/numThreads;
   printf("here it is %f\n",total_time);
