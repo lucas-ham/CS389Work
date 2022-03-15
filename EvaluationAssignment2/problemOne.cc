@@ -108,6 +108,7 @@ int main(int argc, char *argv[]){
     total_time += answerVect[i];
     printf("Data from thread %d:  %f\n",i,answerVect[i]);
   }
+  printf("The average thread completion time was:  %f\n",total_time/numThreads);
   printf("The total Completion time was:  %f\n",time);
   return 0;
 
