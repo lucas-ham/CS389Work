@@ -84,6 +84,7 @@ int main(int argc, char *argv[]){
     }
   }
   //declare these vectors after so they can be initialized too
+  double threshhold = 500;
   auto temp = numThreads - 250;
   if (temp >0){
     numThreads = 250;
@@ -104,9 +105,22 @@ int main(int argc, char *argv[]){
   delta.tv_nsec = end.tv_nsec - start.tv_nsec;
   double time = (delta.tv_sec) + (delta.tv_nsec)/(double)NANOS;
 
+  double maxTime = 0;
+  double minTime = answerVect[0];
+  int_t doNotInclude = 0;
   for (i = 0; i < numThreads; i ++){
-    total_time += answerVect[i];
-    printf("Data from thread %d:  %f\n",i,answerVect[i]);
+    if (answerVect[i] < threshhold){
+      if (answerVect[i] > maxTime){
+        maxTime = answerVect[i];
+      }
+      if (answerVect[i] < minTime){
+        minTime = answerVect[i];
+      }
+      total_time += answerVect[i];
+      //printf("Data from thread %d:  %f ns\n",i,answerVect[i]);
+    }else{
+      doNotInclude +=1;
+    }
   }
 
   auto flag = temp;
@@ -136,14 +150,29 @@ int main(int argc, char *argv[]){
     delta.tv_nsec = end.tv_nsec - start.tv_nsec;
     time += (delta.tv_sec) + (delta.tv_nsec)/(double)NANOS;
 
-    for (i = 0; i < temp; i ++){
-      total_time += answerVect[i];
-      printf("Data from thread %d:  %f\n",i+int(threadCount),answerVect[i]);
+
+    total_time += answerVect[0];
+    for (i = 1; i < temp; i ++){
+      if (answerVect[i] < threshhold){
+        if (answerVect[i]>maxTime){
+          maxTime = answerVect[i];
+        }
+        if (answerVect[i] < minTime){
+          minTime = answerVect[i];
+        }
+        total_time += answerVect[i];
+        //printf("Data from thread %d:  %f ns\n",i+int(threadCount),answerVect[i]);
+      }else{
+        doNotInclude += 1;
+      }
       }
     threadCount +=250;
     }
 
-  printf("The average thread completion time was:  %f\n",total_time/(numThreads));
+  printf("The average thread completion time was:  %f ns\n",total_time/(numThreads - doNotInclude));
+  printf("The total threads over the threshhold time (of %f) was:  %lld\n", threshhold, doNotInclude);
+  printf("The longest thread execution was:   %f ns\n", maxTime);
+  printf("The shortest thread execution time was:  %f ns\n", minTime);
   printf("The total Completion time was:  %f\n",time);
   return 0;
 
