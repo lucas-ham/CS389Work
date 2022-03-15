@@ -26,7 +26,6 @@
 
 
     for(i = 0; i < searches; i++){
-      index = distr(generator);
       if (secondArraySize >0){
         //this for loop could probably be optimized
         for (j = 0; j < 50; j++){
@@ -34,6 +33,7 @@
           tmp = array2[oppIndex];
         }
       }
+      index = distr(generator);
       if (prefetch){
         tmp = array[index];
       }
