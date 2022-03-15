@@ -28,6 +28,7 @@
     for(i = 0; i < searches; i++){
       index = distr(generator);
       if (secondArraySize >0){
+        //this for loop could probably be optimized
         for (j = 0; j < 50; j++){
           oppIndex = distr2(generator);
           tmp = array2[oppIndex];
@@ -83,6 +84,10 @@ int main(int argc, char *argv[]){
     }
   }
   //declare these vectors after so they can be initialized too
+  auto temp = numThreads - 280;
+  if (temp >0){
+    numThreads = numThreads - temp;
+  }
   vector<thread> threadVector;
   vector<double> answerVect(numThreads, 0);
   vector<Timer> times(numThreads, Timer(length,searches,array2Length,prefetch));
@@ -103,8 +108,33 @@ int main(int argc, char *argv[]){
     total_time += answerVect[i];
     printf("Data from thread %d:  %f\n",i,answerVect[i]);
   }
-  printf("The average thread completion time was:  %f\n",total_time/numThreads);
-  printf("The total Completion time was:  %f\n",time);
+
+  double time2 = 0;
+  if (temp > 0){
+    vector<thread> threadVector;
+    vector<double> answerVect(temp, 0);
+    vector<Timer> times(temp, Timer(length,searches,array2Length,prefetch));
+
+    clock_gettime(CLOCK_REALTIME, &start);
+    for (i = 0; i < temp;i++){
+      threadVector.emplace_back(times[i], &answerVect[i]);
+    }
+    for (i = 0; i < temp;i++){
+      threadVector[i].join();
+    }
+    clock_gettime(CLOCK_REALTIME, &end);
+    delta.tv_sec = end.tv_sec - start.tv_sec;
+    delta.tv_nsec = end.tv_nsec - start.tv_nsec;
+    time2 = (delta.tv_sec) + (delta.tv_nsec)/(double)NANOS;
+
+    for (i = 0; i < temp; i ++){
+      total_time += answerVect[i];
+      printf("Data from thread %d:  %f\n",i+int(numThreads),answerVect[i]);
+    }
+  }
+
+  printf("The average thread completion time was:  %f\n",total_time/(numThreads+temp));
+  printf("The total Completion time was:  %f\n",time+time2);
   return 0;
 
 }
