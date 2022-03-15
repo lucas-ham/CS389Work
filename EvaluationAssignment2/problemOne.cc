@@ -1,55 +1,57 @@
 #include "main.hh"
 
+  void Timer::operator() (double* answer){
+    double time_total = 0.0;
+    std::vector<int_t> array;
+    std::vector<int_t> array2;
+    bool useArray2;
+    int_t index;
+    int_t oppIndex;
+    int i;
+    int j;
+    int_t tmp;
+    struct timespec start, finish, delta;
 
-double timer(int_t length, double searches, int_t secondArraySize, int_t prefetch){
-  double time_total = 0.0;
-  int_t* array;
-  int_t* array2;
-  bool useArray2;
-  int_t index;
-  int_t oppIndex;
-  int i;
-  int j;
-  int_t tmp;
-  struct timespec start, finish, delta;
+    random_device device;
+    mt19937 generator(device());
+    uniform_int_distribution<int_t> distr(1,length);
+    uniform_int_distribution<int_t> distr2(1,secondArraySize);
 
-  array = (int_t*)malloc(length*sizeof(int_t));
-  if (secondArraySize > 0){
-    array2 = (int_t*)malloc(secondArraySize*sizeof(int_t));
-    useArray2 = true;
-  } else{
-    useArray2 = false;
-  }
-  srand(clock());
-  for(i = 0; i < searches; i++){
-    index = rand()%length;
-    //in an attempt to make sure there's no useful prefetching going on we have a second array that we read from first to discourage prefetching
-      //bunch of random calls to the array before hand to try and evict any elements from array
-    if (useArray2){
-      for (j = 0; j < 50; j++){
-        oppIndex = rand()%secondArraySize;
-        tmp = array2[oppIndex];
+    for (i = 0;i<length;i++){
+      array.push_back(distr(generator));
+    }
+    if (secondArraySize > 0){
+      for (i=0; i < secondArraySize; i++){
+        array2.push_back(distr2(generator));
       }
+      useArray2 = true;
+    } else{
+      useArray2 = false;
     }
 
-    if (prefetch){
+
+    for(i = 0; i < searches; i++){
+      index = distr(generator);
+      if (useArray2){
+        for (j = 0; j < 50; j++){
+          oppIndex = distr2(generator);
+          tmp = array2[oppIndex];
+        }
+      }
+      if (prefetch){
+        tmp = array[index];
+      }
+      clock_gettime(CLOCK_REALTIME, &start);
       tmp = array[index];
+      clock_gettime(CLOCK_REALTIME, &finish);
+      delta.tv_sec = finish.tv_sec - start.tv_sec;
+      delta.tv_nsec = labs(finish.tv_nsec - start.tv_nsec);
+      time_total += (delta.tv_sec) + (delta.tv_nsec)/(double)NANOS;
     }
-    clock_gettime(CLOCK_REALTIME, &start);
-    //tmp = array[index];
-    clock_gettime(CLOCK_REALTIME, &finish);
-
-    delta.tv_sec = finish.tv_sec - start.tv_sec;
-    delta.tv_nsec = labs(finish.tv_nsec - start.tv_nsec);
-
-    time_total += (delta.tv_sec) + (delta.tv_nsec)/(double)NANOS;
-
+    time_total = time_total/(double)searches;
+    time_total = time_total*(double)NANOS;
+    *answer = time_total;
   }
-  time_total = time_total/(double)searches;
-  time_total = time_total*(double)NANOS;
-  return time_total;
-}
-
 
 int main(int argc, char *argv[]){
   //according to a google search:
