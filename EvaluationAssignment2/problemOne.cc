@@ -86,8 +86,24 @@ int main(int argc, char *argv[]){
       return 0;
     }
   }
-  total_time = timer(length, searches, array2Length, prefetch);
-  printf("%f",total_time);
+  vector<thread> threadVector;
+  vector<double> answerVect(numThreads, 0);
+  vector<Timer> times(numThreads, Timer(length,searches,array2Length,prefetch));
+  
+  for (i = 0; i < numThreads;i++){
+    threadVector.emplace_back(times[i], &answerVect[i]);
+  }
+  for (i = 0; i < numThreads;i++){
+    threadVector[i].join();
+  }
+  for (i = 0; i < numThreads; i ++){
+    total_time += answerVect[i];
+    printf("Data from thread %d:  %f\n",i,answerVect[i]);
+  }
 
+
+  total_time = total_time/numThreads;
+  printf("here it is %f\n",total_time);
   return 0;
+
 }
