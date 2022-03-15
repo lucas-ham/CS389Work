@@ -86,7 +86,7 @@ int main(int argc, char *argv[]){
   //declare these vectors after so they can be initialized too
   auto temp = numThreads - 250;
   if (temp >0){
-    numThreads = numThreads - temp;
+    numThreads = 250;
   }
   vector<thread> threadVector;
   vector<double> answerVect(numThreads, 0);
@@ -109,8 +109,15 @@ int main(int argc, char *argv[]){
     printf("Data from thread %d:  %f\n",i,answerVect[i]);
   }
 
-  double time2 = 0;
-  if (temp > 0){
+  auto flag = temp;
+  while (flag > 0){
+    if (flag > 250){
+      flag -= 250;
+      temp = 250;
+    }else{
+      temp = flag;
+      flag = -1;
+    }
     vector<thread> threadVector;
     vector<double> answerVect(temp, 0);
     vector<Timer> times(temp, Timer(length,searches,array2Length,prefetch));
@@ -125,16 +132,16 @@ int main(int argc, char *argv[]){
     clock_gettime(CLOCK_REALTIME, &end);
     delta.tv_sec = end.tv_sec - start.tv_sec;
     delta.tv_nsec = end.tv_nsec - start.tv_nsec;
-    time2 = (delta.tv_sec) + (delta.tv_nsec)/(double)NANOS;
+    time += (delta.tv_sec) + (delta.tv_nsec)/(double)NANOS;
 
     for (i = 0; i < temp; i ++){
       total_time += answerVect[i];
       printf("Data from thread %d:  %f\n",i+int(numThreads),answerVect[i]);
+      }
     }
-  }
 
   printf("The average thread completion time was:  %f\n",total_time/(numThreads+temp));
-  printf("The total Completion time was:  %f\n",time+time2);
+  printf("The total Completion time was:  %f\n",time);
   return 0;
 
 }
