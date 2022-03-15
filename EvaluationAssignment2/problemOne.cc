@@ -2,8 +2,6 @@
 
   void Timer::operator() (double* answer){
     double time_total = 0.0;
-    std::vector<int_t> array;
-    std::vector<int_t> array2;
     bool useArray2;
     int_t index;
     int_t oppIndex;
@@ -17,22 +15,19 @@
     uniform_int_distribution<int_t> distr(1,length);
     uniform_int_distribution<int_t> distr2(1,secondArraySize);
 
-    for (i = 0;i<length;i++){
-      array.push_back(distr(generator));
-    }
+    vector<int_t> array(length,distr(generator));
+    vector<int_t> array2(secondArraySize,distr2(generator));
     if (secondArraySize > 0){
-      for (i=0; i < secondArraySize; i++){
-        array2.push_back(distr2(generator));
-      }
       useArray2 = true;
     } else{
+      vector<int_t> array2;
       useArray2 = false;
     }
 
 
     for(i = 0; i < searches; i++){
       index = distr(generator);
-      if (useArray2){
+      if (secondArraySize >0){
         for (j = 0; j < 50; j++){
           oppIndex = distr2(generator);
           tmp = array2[oppIndex];
