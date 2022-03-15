@@ -100,8 +100,8 @@ int main(int argc, char *argv[]){
   }
   clock_gettime(CLOCK_REALTIME, &end);
   delta.tv_sec = end.tv_sec - start.tv_sec;
-  delta.tv_nsec = labs(end.tv_nsec - start.tv_nsec);
-  double time = (delta.tv_sec) + (delta.tv_nsec)/NANOS;
+  delta.tv_nsec = end.tv_nsec - start.tv_nsec;
+  double time = (delta.tv_sec) + (delta.tv_nsec)/(double)NANOS;
 
   for (i = 0; i < numThreads; i ++){
     total_time += answerVect[i];
