@@ -1,12 +1,12 @@
 CXX=g++
 CXXFLAGS=-Wall -Wextra -Werror -pedantic -o0 -g -O3 -std=c++20
-all: make_main
+all: threaded
 
-make_main: main.o
-	$(CXX) $(CXXFLAGS) -o main main.o
+single: singleThreaded.cc main.hh
+	$(CXX) $(CXXFLAGS) -o single singleThreaded.cc
 
-main.o: main.cc main.hh
-	$(CXX) $(CXXFLAGS) -c -o main.o main.cc
+threaded: multiThreaded.cc main.hh
+	$(CXX) $(CXXFLAGS) -o single multiThreaded.cc
 
 clean:
-	rm -rf *.o main
+	rm -rf *.o *.dSYM single threaded 
