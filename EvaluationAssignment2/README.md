@@ -1,3 +1,11 @@
+# Table Of Contents:
+### 1. [Main Program](#main-program)
+### 2. [Caller Program](#caller-program)
+### 3. [Extra Options](#extra-options)
+### 4. [Results](#results)
+### 5. [Error Handling](#error-handling)
+
+
 # Main Program
 
 The main program is nested inside of a class (this is to make the multithreaded portion easier/more straightforward). The main thing done by the class is an overwritting of the parenthesis operator, which is implemented in main.cc. This function takes only one input, `&answer` which is a reference to where the result should be stored. But in the creation of the object, the `length`, `number of searches`, `size of the second array`, and if `prefetching` should be done is also pased to the object and later used in the main function.
@@ -47,13 +55,16 @@ The caller program works the same for any number of threads, so the explanation 
 # Error Handling
  _A major concern when timing nanoseconds is interuptions and ensuring that only the desired code is being included in the timing section, there were a few approaches to try and ensure that this was the case_
 
-
  1. Many Many Many Trials
     1. No one trial was used to understand the timing, and repetion of tests was important to make sure that there wasn't some weird OS exception that gave an inaccurate reading
 
 
  2. Thresholding
     1. Specifically for the multithreaded portion, but also for the single threaded version, I used a threshholding of values to ensure that the averge thread completion time wasn't being thrown off by one super slow thread
+
+
+3. Clock_gettime Overhead:
+   1. The most costly part of the timing was the timing
 
 
 ADD IN:
@@ -65,4 +76,45 @@ ADD IN:
 ADD IN:
 - array 2 size/purpose
 - prefetchng purpose
--
+
+
+
+//according to a google search:
+  //l1 for my computer is 128 kb
+  //l2 for my computer is 24 mb
+//int64_t has size 8 bytes, so length > 128000 can't be stored in l1 alone
+  //need length > 2.4e+7 + 128000 to not be held in l2 either
+
+//according to system information, processor runs at 3.2 GHz
+  //so there are 3.2 billion clock cycles/second
+  //so roughly each clock cycle should take 0.32 nanoseconds on my computer
+
+
+
+
+Features to add to the program:
+- no more command line arguements
+- run through multiple buffers, increasing by a power of 2 each time
+  - for single thread, just run in sequence
+  - multithread run until they're all done
+- graphing
+- Parameters section of code
+  - numThreads
+  - starting buffer size
+  - end buffer size
+  - number of searches for each buffer size
+  - prefetching
+  - second array size
+- multiple accesses in one loop?
+  - how would we do that?
+    - if we do a vector of random indices, then there are 2 accesses per loop (array[index[i]])
+      - Just accept that and move on, or keep with what we're doing
+    - Also have a for loop then
+  - Currently not that accurate, high deviation on raw time
+
+
+things to change about readme:
+- clean up code description
+  - remove a lot of it
+- Show how to make and run
+  - model off of taylor's
