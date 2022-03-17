@@ -52,7 +52,6 @@ int_t calculatepower(int_t start, int_t end){
   return floor(log (end - start));
 }
 
-//int main(int argc, char *argv[]){
 int main(){
   // PARAMETERS alter the assignment of thee variabls to change the program:
     int_t initialLength = 100;
@@ -61,7 +60,6 @@ int main(){
     int_t prefetch = 0;
     double searches = 10000000;
 
-  //double total_time = 0.0;
   int i;
   int_t numAccesses;
   struct timespec start, end, delta;

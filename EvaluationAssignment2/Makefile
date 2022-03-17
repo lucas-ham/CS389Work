@@ -1,12 +1,12 @@
 CXX=g++
 CXXFLAGS=-Wall -Wextra -Werror -pedantic -o0 -g -O3 -std=c++20
-all: threaded
+all: barriers
 
-single: singleThreaded.cc main.hh
-	$(CXX) $(CXXFLAGS) -o single singleThreaded.cc
+single: timing.cc timing.hh
+	$(CXX) $(CXXFLAGS) -o timing.cc
 
-threaded: multiThreaded.cc main.hh
-	$(CXX) $(CXXFLAGS) -o single multiThreaded.cc
+barriers: barriers.cc barriers.hh
+	$(CXX) $(CXXFLAGS) -o single barriers.cc
 
 clean:
-	rm -rf *.o *.dSYM single threaded 
+	rm -rf *.o *.dSYM timing barriers
