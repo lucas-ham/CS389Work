@@ -1,4 +1,4 @@
-#include "main.hh"
+#include "timing.hh"
 
   void Timer::operator() (double* answer){
     double time_total = 0.0;
