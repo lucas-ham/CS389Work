@@ -11,6 +11,7 @@
 #include <random>
 
 #include <time.h>
+#include <math.h>
 
 typedef int64_t int_t;
 
@@ -28,5 +29,7 @@ class Timer{
 
     void operator() (double* answer);
   };
+
+int_t calculatepower(int_t start, int_t end);
 
 using namespace std;
