@@ -28,6 +28,7 @@ class Timer{
     length(length), searches(searches), secondArraySize(secondArraySize), prefetch(prefetch){};
 
     void operator() (double* answer);
+    void updateLength(int_t changed){length = changed;};
   };
 
 int_t calculatepower(int_t start, int_t end);
