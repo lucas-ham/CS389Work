@@ -118,3 +118,73 @@ things to change about readme:
   - remove a lot of it
 - Show how to make and run
   - model off of taylor's
+
+
+
+
+
+# Problem 2:
+
+## Part a:
+  The implemenation of the barriers was largely the same as the implementation described in class, there were no significant variations from those in class. The implemenations changed slightly as I tested everything to ensure it worked (like passing a pointer to sense in MCS so it can be maintained for multiple calls to a single MCS barrier). Other than some simple changes like that, there was nothing done significantly different.
+
+  There are some parameters/variables created at the top of `timing.hh`. These are mostly just the flags and other variables barriers need to have available globally. The number of threads to use is also declared here, so that vectors can be initialized if they need to know how many threads to expect. Modifying this value is the best way to change the number of threads. Although, treating this declaration of the number of threads as the "maximum" number of threads should also work as it allocates more space than the barriers would need later, which isn't an issue.
+    - this approach is used for timing, there's a function that iterates through from a starting number of threads to the max threads, and this works as expected
+
+  The implementation of the barriers is in the file `barriers.cc`. There is no main function for this file, this is just a file included in other tests and files.
+
+## Part b:
+  There are four tests I wrote to prove the functionality of the barriers. The barriers mostly pass the tests, and passing all of them seems to cover the sufficient edge cases to make sure the barriers do what they should be doing.
+  1. This test is designed to make sure that threads are not allowed to leave the barrier until all have arrived, this is done with a few steps.
+     1. Two threads (not the same thread) are selected at random, one to be the "wait thread" and the other to be the "overwrite thread"
+     2. The rest of the threads simply run the barrier as normal and go directly to it once initialized
+     3. The wait thread waits a specified amount of time (normally 1-2 seconds), and then writes to an atomic global variable. Once this write is over, it enters the barrier
+     4. The over write thread goes directly into the barrier and upon leaving overwrites the same atomic global that wait thread writes to.
+     5. The goal is that the value written by the "over write" thread is what will be there after all threads are joined
+        1. if the first value is there, then that means the overwrite thread left the barrier and wrote to a variable before the wait thread even entered the barrier
+           1. This case means the barrier failed, because a thread shouldn't be able to leave before all the others have arrived.
+     6. This test was run for all barriers for random wait/overwrite threads, and passed, which shows that the barriers really do hold all the threads until every thread its expecting arrives.
+  2. This test was designed to test the reusability of the barriers:
+     1. Essentially it just runs the same barrier over and over, making sure to be careful about sense/parity as appropriate so that we can ensure this functionality exists.
+     2. This is not a super complicated test, but the concept is important since there is a lot of work/engineering that went into designing barriers that can be reused without having sleeping thread issues.
+  3. This test was designed to make sure running a barrier multiple times still maintains order and "holds" the Threads
+     1. This test is essentially the combination of the first two tests, and potentially a more helpful version of the previous test
+     2. The goal was to make sure that repeated uses of barriers do in fact still work and don't just let the threads move through them instantly
+     3. This really puts a strain on ensuring parity/sense do work, otherwise it would be possible for a thread to just go straight through a barrier it has already been too
+     4. This is the test the barriers have the most difficulty with, I've tried to minimize it but occasionally some of the barriers still have problems with it
+        1. MCS is really the only one that fails this test anymore, and even MCS still passes too.
+        2. While it could be a barrier implementation issue, my guess is that it's instead a sense management issue since this test deals with maintaining sense differently than the previous test does.
+  4. This test was designed to test the waiting of barriers:
+     1. This test uses the first test to ensure that barriers do hold all threads until the arrival of all threads
+     2. It also has all the threads wait a random amount of time before entering the barrier, this could create scenarios where the threads are waiting on a single thread that hasn't entered the barrier yet
+        1. The variables `maxWait` and `loops` specify the maximum time a thread will wait and the maximum number of times a thread will repeat it's waiting, these variables are declared with the parameters in `barriers.hh`
+  5. Together these tests form a fairly cohesive test of the issues that could arrive with barriers, and create a decent case that the barriers are in fact working as expected.
+     1. The first test, ensuring barriers hold all threads, does a lot of the heavy lifting but this is also a fairly important aspect of barriers. Passing this test really does prove that it is a functioning barrier, because the randomness of selecting the wait/overwrite thread shows that the barrier is holding all threads not just a select ordering.
+     2. The second test then shows us that sense reversal is implenmented correctly to allow barriers to be reused.
+     3. The third and fourth tests work to create some weird edge cases themselves as they include randomness, waiting, and repetition to try and get the barriers to fail.
+
+  All tests are implemented in the file `test_barriers.cc` and there are segments of code (some commented out) to run each of the tests in the main function. To compile this file run `make barriers_test` then `./barriers_test`
+
+## Part c:
+  This portion was fairly straightforward, although the data collected is interesting to analyze and see.
+  There is a file titled `generate_barriers.cc` which includes code to time each of the barriers.
+  1. Generic to barrier type "B" these functions work fairly simply, there are 3 functions important to time B
+     1. There's first a function (titled get_B_time) that takes the number of threads as input, and starts that many of threads to go to B
+        2. The function that get_B_time calls is "B_timer". This function simply starts a timer, calls "runB" and on completion of that function finally ends the timer. It then writes the time to a variable given to it by it's caller
+        3. The function "runB" simply waits a random amount of time (again as indicated by `maxWait` and `loops` in `barriers.hh`) and then enters the barrier B
+     4. Once all the threads have finished, get_B_time joins all the threads, sums all of their times, and returns the average time/thread.
+  2. The code in main() (of `generate_barriers.cc`) simply runs the above functions for an increasing number of threads and prints their data in CSV format.
+
+  These functions are implemented in `generate_barriers.cc` and can be compiled by running `make barriers_time`. Execute this file with `./barriers_time` and either read that data in the terminal, or push it into a file (for me pushing it into a file was `./barriers_time -> fileName.csv`).
+
+## Part d:
+  The data gathered in part C was put into a csv file and then graphed. The resulting graph is also in this repository as `BarriersGraph.pdf` and the data that created that graph is in the repository as `barriers.ods`. This includes the time/thread for each barrier starting with 4 threads and incrimenting by 4 threads to 250 threads.
+
+## Part e:
+  The biggest trend observable was that centralized barriers are not as good as MCS or dissemination barriers. The time to synchronize for every number of threads tested was higher for centralized than MCS. And there was only one number of threads (right around 125) where centralized beat dissemination. Overall, centralized did not prove to be an effictive or useful form of syncronization.
+
+  Additionally, centralized barriers had an increase in syncronization time as the number of threads increased. This makes sense, as it's waiting for more threads to complete their random wait before entering the barrier, and it uses an atomic fetch_add so even if all the threads arrived at the same time, it would still take some time since the atomic fetch_add has to happen sequentially. Interestingly though, the time for centralized seemed to have a lot of variation even as the number of threads increased. It formed a graph with a lot of jumps in it and didn't have a consistent increase. Overall the trend was definitely time increasing with number of threads, but it wasn't strictly increasing.
+
+  MCS and Dissemination didn't show much variation. Both are fairly efficient so them being better than centralized is no huge suprise, but there wasn't much change between them. I tried just plotting MCS and dissemination times to get a better sense of their difference, but there wasn't any observable difference. I also plotted the graph with points (i, MCS(i)-Dissemination(i)) to try and get a sense of how the times varied (specifically to see if this graph was positive or negative more often to see which was larger) but that was also largely unhelpful. I ran the tests multiple times to see if these results were just an off chance, but every run of the file gave largely the same patterns. Another example is in the file `barriers2.ods` which is just another data set to show the similarity. The graph of this data is also in the repository as `BarriersGraph2.pdf`
+
+  Based on the data collected, either MCS or Dissemination would be a good choice of barrier for any number of threads. Those two barriers were consistently signifcantly better than the other barrier tested without having much difference between the two. From a space analysis perspective, MCS barriers would be better as they take less space to implement. So, with space being the only deciding factor, MCS barriers would be the best option.
