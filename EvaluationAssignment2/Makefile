@@ -1,12 +1,18 @@
 CXX=g++
-CXXFLAGS=-Wall -Wextra -Werror -pedantic -o0 -g -O3 -std=c++20
-all: barriers
+CXXFLAGS=-Wall -Wextra -pedantic -pthread -g -std=c++20
+all: barriers_time
 
-single: timing.cc timing.hh
-	$(CXX) $(CXXFLAGS) -o timing.cc
+timing: timing.cc timing.hh
+	$(CXX) $(CXXFLAGS) -o timing timing.cc
 
 barriers: barriers.cc barriers.hh
-	$(CXX) $(CXXFLAGS) -o single barriers.cc
+	$(CXX) $(CXXFLAGS) -o barriers barriers.cc
+
+barriers_test: barriers.cc barriers.hh test_barriers.cc
+	$(CXX) $(CXXFLAGS) -o barriers_test test_barriers.cc
+
+barriers_time: barriers.cc barriers.hh generate_barriers.cc
+	$(CXX) $(CXXFLAGS) -o barriers_time generate_barriers.cc
 
 clean:
-	rm -rf *.o *.dSYM timing barriers
+	rm -rf *.o *.dSYM timing barriers barriers_test barriers_time
