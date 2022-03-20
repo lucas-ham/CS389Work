@@ -1,55 +1,36 @@
-# Table Of Contents:
-### 1. [Main Program](#main-program)
-### 2. [Caller Program](#caller-program)
-### 3. [Extra Options](#extra-options)
-### 4. [Results](#results)
-### 5. [Error Handling](#error-handling)
 
+# Problem 1
 
-# Main Program
+## Part a
+  The main program is nested inside of a class. The main thing done by the class is an overwritting of the parenthesis operator, which is implemented in `timing.cc`. This function takes only one input, `&answer` which is a reference to where the result should be stored. But in the creation of the object, the `length`, `number of searches`, `size of the second array`, and if `prefetching` should be done is also pased to the object and later used in the main function.
+  1. First, the function initializes two vectors (named arrays in the code, but they are clearly vectors). It sets one of them equal to `length` (N), and the second equal to a given/set `secondArraySize` (the purpose of the second array is explained in [Extra Options](#extra-options)). A mersene twister is used to set these vectors to random values, this was done so there couldn't be a compiler optimization if instead `array[i] = i` or `array[i] = c` for some constant c.
+  2. Next, the program enters the main `for` loop of the code which does the actual work of the function.
+     1. First the program will optionally load a specified number of values from the second array
+        1. Again this is explained in [Extra Options](#extra-options)) as to why this is done (or not done)
+     2. Next, the program loads a random index of array
+        1. Optionally it "prefetches" this value, see [Extra Options](#extra-options))
+     3. Then the program collects the current time, accesses array[index], and gets the current time Again
+        1. From the two time stamps collected, it calculates the difference and adds this to `time_total` which keeps track of the total time that's been calculated.
+     4. This for loop runs for `searches` times, based on input during the construction of the timer object that holds the function
+  3. After the `for` loop, the function calculates an average for the individual access time and stores this value where the input reference points to so it can be accessed outside of function. It formally returns nothing, but there is a collectable result if the caller keeps track of the input address.
+  4. The code in the `main` function then just creates a `Timer` object and runs it for increasing buffer sizes.
+     1. The main function also then prints out the data in CSV format so it can be used/analyzed.
+  5. There are some "extra options" for the code to try and either beat or help the compiler to produce the fastest code, there's a section below where I explain what these each do. The parameters to set these options on/off are at the start of the `main` function in `timing.cc` along with buffer size(length) and number of searches parameters.
+  6. To run this code for yourself, first run `make timing` then `./timing`. The output of this file is in CSV format, so sending it to a CSV file to analyze (for example `./timing -> timing.csv`) is recomended.
 
-The main program is nested inside of a class (this is to make the multithreaded portion easier/more straightforward). The main thing done by the class is an overwritting of the parenthesis operator, which is implemented in main.cc. This function takes only one input, `&answer` which is a reference to where the result should be stored. But in the creation of the object, the `length`, `number of searches`, `size of the second array`, and if `prefetching` should be done is also pased to the object and later used in the main function.
-1. First, the function initializes two vectors (named arrays in the code, but they are clearly vectors). It sets one of them equal to `length` (N), and the second equal to a given/set `secondArraySize` (the purpose of the second array is explained in [Extra Options](#extra-options)). A mersene twister is used to set these vectors to random values, this was done so there couldn't be a compiler optimization if instead `array[i] = i` or `array[i] = c` for some constant c.
-2. Next, the program enters the main `for` loop of the code which does the actual work of the function.
-   1. First the program will optionally load a specified number of values from the second array
-      1. Again this is explained in [Extra Options](#extra-options)) as to why this is done (or not done)
-   2. Next, the program loads a random index of array
-      1. Optionally it "prefetches" this value, see [Extra Options](#extra-options))
-   3. Then the program collects the current time, accesses array[index], and gets the current time Again
-      1. From the two time stamps collected, it calculates the difference and adds this to `time_total` which keeps track of the total time that's been calculated.
-   4. This for loop runs for `searches` times, based on input during the construction of the timer object that holds the function
-3. After the `for` loop, the function calculates an average for the individual access time and stores this value where the input reference points to so it can be accessed outside of function. It formally returns nothing, but there is a collectable result if the caller keeps track of the input address.
+## Part b:
+  There are 4 graphs that were created, and are viewable in this repository in the file `TimingGraphs.pdf`. Each of the graphs corresponds to one of the four possible settings of "prefetch" and "array2Length" (again the purpose/meaning of these settings are described below). In addition to the graphs, there are also four .ods files that have the data shown in those graphs avaailable in the repository to view and observe as well.
 
-ADD IN:
-- how to get the overhead of clock_gettime
-- WHY clock_gettime and CLOCK_REALTIME were chosen to be used
+  All of the graphs have the same range of buffer size, all starting at 800 bytes (0.8 kb) and increasing by a factor of 2 to 419430400 bytes (419430.4 kb, 0.4194304 gb).
 
+  Additionally, the data used in these graphs are each from one trial but they were compared against other trials to make sure that they are a good reference for what the values should be expected to be. And, one trial has many searches, for the data there were 10,000,000 searches/loads on each buffer size and the time value listed is the average of all of those loads. This helped account for variation and get a good sense of the average/expected value.
 
-# Caller Program
-The caller program works the same for any number of threads, so the explanation will be done for any number of threads. To run the single threaded version, running it with the number of threads equal to one shouldn't (and wasn't observed to) have any impact on the run time.
-1. The first thing the caller program does is create three vectors to be used for the multithreaded portion. Two are initialized at their declaration, all three have the same size, `numThreads`
-   1. `threadVector`:
-      1. This is the only one of the vectors not initalized at it's creation, but it is where all of the threads will be stored so they are accounted for and can be joined
-   2. `answerVect`:
-      1. This is a vector of pointers and is where the `ith` thread will store its output. All these values are initialized to 0, so there is data there and we can catch at the end if the thread failed to write any data.
-   3. `times`:
-      1. This is a vector of `Timer` objects, Timer objects are the custom class that runs the code the project is interested in. All of the timer objects are initalized with the same values, so all threads are doing the same task.
-2. Once the vectors are initialized, the threads can finally be started and placed sequentially in `threadVector`
-   1. Each thread then runs the program described [above](#main-program)
-3. The threads are then joined in the order they were started
-4. The code then has a check to make sure that no more than 250 threads are being run at the same time, and will stop here to repeat the code above if the user requested more than 250 threads
-   1. The reason here is that if more than 250 threads were being run sequentially (at least on my computer) the random_device would sporadically fail due to too many instances being created at the same time. Having more than 250 threads seemed potentially unlikely, but I added a catch for that just in case and that's the code that follows.
-5. There are additionally four portions that were added in afterwards which make the program potentially take longer but also give more useful results
-   1. Total Execution Time:
-      1. The program also takes the total execution time, using the same method described [above](#main-program), just to give a sense of how long the code is taking to execute.
-   2. Minimum Thread Completion Time:
-      1. A useful metric for getting a sense of the lower bound on thread execution
-   3. Maximum Thread Completion Time:
-      1. Also helpful for understanding the variance between threads
-   4. Threshholding:
-      1. This is more deeply explained [below](#error-handling), but the general concept is to limit the deviation due to interruptions and other aspects that might slow down the thread.
-6. Lastly, the program prints the values.
+## Part c:
+  The first graph in the pdf (the one labeled "Timing: No prefetching or second array") gives the most accurate depiction of my cache sizes, and also makes the difference between l1 and l2 very clear. The access time was pretty constant for buffers between 800 bytes and 13107200 bytes (13107.2 kb). The read time for buffers on this range was around `18.3 ns` not accounting for the overhead of the clock function. So that means these reads took about `0.7641 ns`. This value seems fairly small. It's possible that the method for finding the clock overhead (running the same code, just without any code between the clock start and stop) is not entirely accurate. Some googling found that the value I was finding for clock_gettime overhead was roughly consistent with what the expected/known value is. But it's still possible there was something being missed.
 
+  But, regardless of the precise timing this graph does show very clearly an uptick in access time right after the 13107200 byte mark, which means this is probably the max size of my l1 cache. A google search about my computer's cache sizes says that my l1 cache is 128 kb, and my l2 cache is 24 mb. Seeing that the increase I saw is multiple factors of 10 larger than that, it seems fair to assume that there was significant optimization going on by the compiler. It's also posssible that my calculation from buffer length to bytes was wrong, but I don't think this is the case. I had C++ compute the byte size for me with `length*sizeof(int_t)` so unless sizeof can yield incorrect results, I would expect my data to be accurate.
+
+  I tried to get a sense of the size (or projected size) of my l2 cache, but running the program with maxLength values much bigger than the one used in the tests took too long to complete. The tests with bigger size that I was able to complete weren't big enough to show the tradeoff between l2 and memory, so I didn't include those trials. I'm not exactly sure why this was an unattainable goal. I did try lowering the number of searches (since I used a fairly high number for the main trials and data), but even going as low as 100 searches/buffer didn't give any huge benefits in abilty to search larger buffers.
 
 
 # Error Handling
@@ -64,63 +45,20 @@ The caller program works the same for any number of threads, so the explanation 
 
 
 3. Clock_gettime Overhead:
-   1. The most costly part of the timing was the timing
-
-
-ADD IN:
-- Accounting for clock_gettime overhead
+   1. The most costly part of the timing was the timing function/method itself. But, this is a relative constant value (with the exception of some noise) so this can be worked out. Running the program many times to time nothing (that is, start timer, stop timer with no code in between) I found a pretty good estimate for the overhead of clock_gettime. The value I used was `17.5526 ns` of overhead factored into clock_gettime. For graphs and large data visualization, this is the value that I subtracted from the time since it seemed to be a good estimate for how much clock_gettime added in.
 
 
 # Extra Options
 
-ADD IN:
-- array 2 size/purpose
-- prefetchng purpose
-
-
-
-//according to a google search:
-  //l1 for my computer is 128 kb
-  //l2 for my computer is 24 mb
-//int64_t has size 8 bytes, so length > 128000 can't be stored in l1 alone
-  //need length > 2.4e+7 + 128000 to not be held in l2 either
-
-//according to system information, processor runs at 3.2 GHz
-  //so there are 3.2 billion clock cycles/second
-  //so roughly each clock cycle should take 0.32 nanoseconds on my computer
-
-
-
-
-Features to add to the program:
-- no more command line arguements
-- run through multiple buffers, increasing by a power of 2 each time
-  - for single thread, just run in sequence
-  - multithread run until they're all done
-- graphing
-- Parameters section of code
-  - numThreads
-  - starting buffer size
-  - end buffer size
-  - number of searches for each buffer size
-  - prefetching
-  - second array size
-- multiple accesses in one loop?
-  - how would we do that?
-    - if we do a vector of random indices, then there are 2 accesses per loop (array[index[i]])
-      - Just accept that and move on, or keep with what we're doing
-    - Also have a for loop then
-  - Currently not that accurate, high deviation on raw time
-
-
-things to change about readme:
-- clean up code description
-  - remove a lot of it
-- Show how to make and run
-  - model off of taylor's
-
-
-
+1. Array 2:
+   1. The concept with this option was to have a second array and have some amount of random loads from this array directly before the timed read of the main buffer.
+   2. The hope was that this would take up at least some of the space that would otherwise be used for the main array, thus making the hit rate lower. As can be seen in the graph where this option was the only one on (one of the four in `timingGraphs.pdf`), this option did slow down the read time and had a large impact on the performance.
+2. Prefetching:
+   1. The concept of this option was to load the value that was going to be timed twice, and only time the second one.
+   2. In theory, this should minimize the load time since it all but guarentees the value will be in the l1 cache since it was just used.
+   3. In practice, this also had a major benefit to the timing. The graph (Labeled "Timing: Prefetching, no second array") shows that having prefetching greatly reduced the access time on bigger buffers. Where the graph without prefetching had a steep increase, this graph shows almost no changes throughout it's buffer increases.
+3. Both Options:
+   1. The last graph shows the results when both of these options are turned on. The resulting graph, as should be conceptually expected, is very similar to the graph with just prefetching. It's important to note here that prefetching always happened after the loads from array 2. The purpose of prefetching was to happen right before the timed load, so that's why this is the case. It could potentially be interesting to see what happens when prefetching is done before the loads from the second array.
 
 
 # Problem 2:
